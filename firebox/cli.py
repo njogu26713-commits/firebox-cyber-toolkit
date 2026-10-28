@@ -28,7 +28,7 @@ def main(argv=None):
         }
         if argv[0] == 'vuln-scan' and len(argv) >= 2 and argv[1].startswith('-'):
             argv = ['web', 'audit'] + argv[1:]
-        elif argv[0] in aliases and len(argv) >= 2 and not argv[1].startswith('-'):
+        elif argv[0] in aliases and len(argv) >= 2 and not argv[1].startswith('-') and not (argv[0] == 'web' and argv[1] in {'check', 'audit', 'enumerate'}):
             command, value, rest = aliases[argv[0]], argv[1], argv[2:]
             option = '--domain' if argv[0] == 'dns' else '--url' if argv[0] in {'web', 'vuln-scan'} else '--file' if argv[0] in {'logs', 'hash', 'metadata'} else '--target'
             argv = command + [option, value] + rest
