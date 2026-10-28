@@ -28,7 +28,11 @@ def _interfaces() -> list[dict]:
 
 def status() -> dict:
     """Return local wireless interfaces only; no nearby-network scan is performed."""
-    return {"interfaces": _interfaces(), "scan_performed": False, "scope": "local interface inventory only"}
+    interfaces = _interfaces()
+    result = {"interfaces": interfaces, "scan_performed": False, "scope": "local interface inventory only"}
+    if not interfaces:
+        result["message"] = "No local wireless interfaces found; this host may be a wired-only or cloud VM."
+    return result
 
 
 def _run_iw(args: list[str]) -> str | None:
@@ -63,7 +67,7 @@ def pcap_metadata(file: str) -> dict:
     """Read only the capture header and record lengths; never decodes payloads."""
     path = Path(file).expanduser().resolve()
     if not path.is_file():
-        raise FileNotFoundError(file)
+        raise FileNotFoundError(f"capture file not found: {path}")
     if path.stat().st_size > 256 * 1024 * 1024:
         raise ValueError("refusing packet captures larger than 256 MiB")
     with path.open("rb") as handle:
