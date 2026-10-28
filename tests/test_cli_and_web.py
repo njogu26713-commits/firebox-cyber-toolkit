@@ -9,7 +9,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 from firebox.cli import main
-from firebox.modules import network, web_security
+from firebox.modules import network, web_audit, web_security
 
 class Handler(BaseHTTPRequestHandler):
     def do_HEAD(self):
@@ -56,6 +56,20 @@ class CliAndWebTests(unittest.TestCase):
                 code = main(["hash", "generate", "--file", str(target), "--json", "--report", str(report)])
             self.assertEqual(code, 0)
             self.assertEqual(json.loads(output.getvalue())["sha256"], json.loads(report.read_text())["sha256"])
+
+    def test_bounded_web_audit_reports_cookie_findings(self):
+        server = HTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            result = web_audit.audit(f"http://127.0.0.1:{server.server_port}")
+            self.assertEqual(result["requests_made"], 1)
+            self.assertTrue(any("SameSite" in item["title"] for item in result["findings"]))
+            with self.assertRaises(ValueError):
+                web_audit.audit(f"http://127.0.0.1:{server.server_port}", ",".join(f"/{i}" for i in range(9)))
+        finally:
+            server.shutdown()
+            server.server_close()
 
 if __name__ == "__main__":
     unittest.main()

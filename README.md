@@ -45,12 +45,15 @@ firebox scan 127.0.0.1 --ports 22,80,443
 firebox ports 127.0.0.1 --ports 22,80,443
 firebox dns example.com
 firebox web https://your-authorized-site.example
+firebox vuln-scan https://your-authorized-site.example
 firebox logs samples/sample-auth.log
 firebox hash README.md
 firebox system info
 ```
 
 Results are human-readable by default. Add `--json` only when another program needs machine-readable output, and add `--report PATH` when a JSON report file is required. The longer forms such as `firebox network scan --target HOST` remain supported.
+
+`firebox vuln-scan URL` is a bounded passive web assessment. It checks the base URL and, only when explicitly supplied, up to eight known paths for TLS, security headers, cookie attributes, server errors, and certificate expiry. It does not crawl, fuzz, brute-force, authenticate, exploit, or submit destructive payloads. It must not be described as a complete penetration test or a full vulnerability scanner.
 
 Human-readable output is colored automatically in an interactive terminal. Color is disabled when output is redirected, when using `--json`, or when the standard `NO_COLOR=1` environment variable is set:
 

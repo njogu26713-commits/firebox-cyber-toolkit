@@ -10,6 +10,7 @@ After `python3 -m pip install -e .`, the `firebox` command is available. These s
 - `firebox ports HOST --ports 22,80,443`: check selected ports.
 - `firebox dns DOMAIN`: resolve a domain.
 - `firebox web URL`: perform a passive web check.
+- `firebox vuln-scan URL`: perform a bounded passive assessment of the URL.
 - `firebox logs PATH`: analyze an authentication log.
 - `firebox hash PATH`: calculate a SHA-256 hash.
 
@@ -19,6 +20,7 @@ Append `--json` for machine-readable output or `--report PATH` to save a JSON re
 - `network ports --target HOST --ports 22,443 [--timeout SECONDS]`: check specified TCP ports sequentially.
 - `dns lookup --domain DOMAIN`: resolve a domain using the system resolver.
 - `web check --url URL [--timeout SECONDS]`: passive HTTPS/HTTP header, cookie, redirect, and TLS check.
+- `web audit --url URL [--paths /,/health] [--timeout SECONDS]`: assess the base URL and up to 8 explicitly supplied paths for observable TLS, header, cookie, and server-response issues. It never crawls, fuzzes, authenticates, exploits, or submits destructive payloads.
 - `logs analyze --file PATH [--threshold N]`: analyze supplied authentication logs.
 - `password generate --length N`: generate a cryptographically secure password (12-256 characters).
 - `password token --length N`: generate a secure URL-safe token (16-256 bytes).
