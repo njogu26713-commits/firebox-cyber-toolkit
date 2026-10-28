@@ -2,7 +2,7 @@ from __future__ import annotations
 import argparse, json, socket, sys
 from firebox import __version__
 from firebox.core import emit, write_report
-from firebox.modules import network, password_tools, log_analyzer, integrity, web_security, web_audit, metadata, system, vulns
+from firebox.modules import network, password_tools, log_analyzer, integrity, web_security, web_audit, metadata, system, vulns, wifi
 
 def ports_arg(value):
     try: ports=[int(x.strip()) for x in value.split(',')]; assert all(1<=p<=65535 for p in ports); return ports
@@ -42,6 +42,7 @@ def main(argv=None):
     inte=sub.add_parser('integrity'); ic=inte.add_subparsers(dest='action',required=True); b=ic.add_parser('baseline'); b.add_argument('--path',required=True); b.add_argument('--baseline',default='data/firebox-baseline.json'); b.add_argument('--force',action='store_true'); add_common(b); s=ic.add_parser('scan'); s.add_argument('--path',required=True); s.add_argument('--baseline',default='data/firebox-baseline.json'); add_common(s)
     md=sub.add_parser('metadata'); mc=md.add_subparsers(dest='action',required=True); mi=mc.add_parser('inspect'); mi.add_argument('--file',required=True); add_common(mi)
     sy=sub.add_parser('system'); si=sy.add_subparsers(dest='action',required=True); inf=si.add_parser('info'); add_common(inf)
+    wf=sub.add_parser('wifi', description='Read-only local wireless diagnostics; no nearby-network scanning or attack actions'); wfc=wf.add_subparsers(dest='action',required=True); wfs=wfc.add_parser('status'); add_common(wfs); wfa=wfc.add_parser('audit'); wfa.add_argument('--interface',required=True); add_common(wfa); wfp=wfc.add_parser('pcap'); wfp.add_argument('--file',required=True); add_common(wfp)
     vu=sub.add_parser('vulns'); vc=vu.add_subparsers(dest='action',required=True); vl=vc.add_parser('list'); vl.add_argument('--db',default='data/firebox.db'); vl.add_argument('--status'); add_common(vl); va=vc.add_parser('add'); va.add_argument('--db',default='data/firebox.db'); va.add_argument('--title',required=True); va.add_argument('--severity',required=True); va.add_argument('--asset',required=True); va.add_argument('--evidence',required=True); va.add_argument('--remediation',required=True); va.add_argument('--status',default='open'); add_common(va)
     a=parser.parse_args(argv)
     try:
@@ -60,6 +61,9 @@ def main(argv=None):
         elif a.module=='integrity': result=integrity.compare(a.path,a.baseline)
         elif a.module=='metadata': result=metadata.inspect(a.file)
         elif a.module=='system': result=system.info()
+        elif a.module=='wifi' and a.action=='status': result=wifi.status()
+        elif a.module=='wifi' and a.action=='audit': result=wifi.audit(a.interface)
+        elif a.module=='wifi': result=wifi.pcap_metadata(a.file)
         elif a.module=='vulns':
             db=vulns.VulnerabilityDB(a.db); result=db.list(a.status) if a.action=='list' else {'id':db.add(a.title,a.severity,a.asset,a.evidence,a.remediation,a.status)}
         else: parser.error('unsupported command')

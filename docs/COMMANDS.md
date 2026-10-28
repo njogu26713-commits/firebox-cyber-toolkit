@@ -13,6 +13,9 @@ After `python3 -m pip install -e .`, the `firebox` command is available. These s
 - `firebox vuln-scan URL`: perform a bounded passive assessment of the URL.
 - `firebox logs PATH`: analyze an authentication log.
 - `firebox hash PATH`: calculate a SHA-256 hash.
+- `firebox wifi status`: list local wireless interfaces only.
+- `firebox wifi audit --interface wlan0`: read-only audit of one local wireless interface.
+- `firebox wifi pcap --file authorized-capture.pcap`: inspect PCAP metadata and record lengths without decoding payloads.
 
 Append `--json` for machine-readable output or `--report PATH` to save a JSON report.
 
@@ -29,6 +32,9 @@ Append `--json` for machine-readable output or `--report PATH` to save a JSON re
 - `integrity baseline --path PATH [--baseline PATH] [--force]`; `integrity scan --path PATH --baseline PATH`: create/compare file baselines.
 - `metadata inspect --file PATH`: report file type hint, size, and SHA-256.
 - `system info`: report local runtime information.
+- `wifi status`: report local wireless interfaces; no nearby-network scan is performed.
+- `wifi audit --interface IFACE`: report local interface state and read-only `iw` link information.
+- `wifi pcap --file PATH`: report classic PCAP metadata and packet counts, with a 256 MiB input limit.
 - `vulns add --title TEXT --severity critical|high|medium|low|info --asset TEXT --evidence TEXT --remediation TEXT [--status open|in-progress|resolved]`: store a finding in SQLite.
 - `vulns list [--status STATUS]`: list stored findings.
 
