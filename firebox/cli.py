@@ -10,6 +10,24 @@ def ports_arg(value):
 
 def add_common(p): p.add_argument('--json', action='store_true'); p.add_argument('--report', help='write JSON report to this path')
 def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+    # Short aliases for the common operator workflow. The expanded commands
+    # remain available for scripts and backwards compatibility.
+    if argv:
+        aliases = {
+            'scan': ['network', 'scan'],
+            'ports': ['network', 'ports'],
+            'dns': ['dns', 'lookup'],
+            'web': ['web', 'check'],
+            'logs': ['logs', 'analyze'],
+            'hash': ['hash', 'generate'],
+            'metadata': ['metadata', 'inspect'],
+        }
+        if argv[0] in aliases and len(argv) >= 2:
+            command, value, rest = aliases[argv[0]], argv[1], argv[2:]
+            option = '--domain' if argv[0] == 'dns' else '--url' if argv[0] == 'web' else '--file' if argv[0] in {'logs', 'hash', 'metadata'} else '--target'
+            argv = command + [option, value] + rest
     parser=argparse.ArgumentParser(prog='firebox', description='Firebox Cyber Toolkit: authorized defensive security operations')
     parser.add_argument('--version', action='version', version=__version__); sub=parser.add_subparsers(dest='module', required=True)
     net=sub.add_parser('network'); ns=net.add_subparsers(dest='action', required=True); scan=ns.add_parser('scan'); scan.add_argument('--target',required=True); scan.add_argument('--ports',type=ports_arg,default=list(range(1,1025))); scan.add_argument('--timeout',type=float,default=2); scan.add_argument('--workers',type=int,default=8); add_common(scan); pp=ns.add_parser('ports'); pp.add_argument('--target',required=True); pp.add_argument('--ports',type=ports_arg,required=True); pp.add_argument('--timeout',type=float,default=2); add_common(pp)

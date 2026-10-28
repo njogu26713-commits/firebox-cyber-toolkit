@@ -7,5 +7,9 @@ version = "0.1.0"
 description = "Lightweight defensive cybersecurity toolkit"
 requires-python = ">=3.10"
 dependencies = []
+[project.scripts]
+firebox = "firebox.cli:main"
+[tool.setuptools.packages.find]
+include = ["firebox*"]
 [tool.pytest.ini_options]
 pythonpath = ["."]

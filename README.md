@@ -10,9 +10,9 @@ git clone https://github.com/njogu26713-commits/firebox-cyber-toolkit.git
 cd firebox-cyber-toolkit
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -r requirements.txt
+python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
-python3 app.py --help
+firebox --help
 ```
 
 No external runtime dependency is required. The optional dashboard and OCR integration are intentionally not enabled in this initial production CLI release. Run commands only against assets you own or are authorized to assess.
@@ -27,7 +27,7 @@ sudo apt-get install -y python3-venv
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install --upgrade pip
-python3 -m pip install -r requirements.txt
+python3 -m pip install -e .
 ```
 
 If `.venv` is present but incomplete, remove only that local environment and recreate it; this does not remove repository files:
@@ -41,14 +41,16 @@ source .venv/bin/activate
 ## First operations
 
 ```bash
-python3 app.py password generate --length 20
-python3 app.py hash generate --file README.md --json
-python3 app.py network scan --target 127.0.0.1 --ports 22,80,443 --json --report reports/localhost.json
-python3 app.py logs analyze --file samples/sample-auth.log --threshold 5 --json
-python3 app.py integrity baseline --path samples --baseline data/samples-baseline.json
-python3 app.py integrity scan --path samples --baseline data/samples-baseline.json --json
-python3 app.py system info --json
+firebox scan 127.0.0.1 --ports 22,80,443
+firebox ports 127.0.0.1 --ports 22,80,443
+firebox dns example.com
+firebox web https://your-authorized-site.example
+firebox logs samples/sample-auth.log
+firebox hash README.md
+firebox system info
 ```
+
+Results are human-readable by default. Add `--json` only when another program needs machine-readable output, and add `--report PATH` when a JSON report file is required. The longer forms such as `firebox network scan --target HOST` remain supported.
 
 Generated passwords and tokens are written only to stdout and are never logged by the application. Store them securely.
 

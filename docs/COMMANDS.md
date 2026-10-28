@@ -2,6 +2,19 @@
 
 Global: `python3 app.py --help`, `python3 app.py --version`.
 
+## Short operator commands
+
+After `python3 -m pip install -e .`, the `firebox` command is available. These shortcuts print readable text by default:
+
+- `firebox scan HOST --ports 22,80,443`: bounded TCP scan.
+- `firebox ports HOST --ports 22,80,443`: check selected ports.
+- `firebox dns DOMAIN`: resolve a domain.
+- `firebox web URL`: perform a passive web check.
+- `firebox logs PATH`: analyze an authentication log.
+- `firebox hash PATH`: calculate a SHA-256 hash.
+
+Append `--json` for machine-readable output or `--report PATH` to save a JSON report.
+
 - `network scan --target HOST [--ports 1,2] [--timeout SECONDS] [--workers N] [--json] [--report PATH]`: bounded TCP scan. Default ports are 1-1024; provide a narrower authorized scope in production.
 - `network ports --target HOST --ports 22,443 [--timeout SECONDS]`: check specified TCP ports sequentially.
 - `dns lookup --domain DOMAIN`: resolve a domain using the system resolver.
