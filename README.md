@@ -52,6 +52,8 @@ firebox system info
 firebox wifi status
 firebox wifi audit --interface wlan0
 firebox wifi pcap --file authorized-capture.pcap
+firebox phishing analyze --file suspicious-email.eml
+firebox phishing template --scenario account-alert --output reports/training-template.txt
 ```
 
 Results are human-readable by default. Add `--json` only when another program needs machine-readable output, and add `--report PATH` when a JSON report file is required. The longer forms such as `firebox network scan --target HOST` remain supported.
@@ -59,6 +61,8 @@ Results are human-readable by default. Add `--json` only when another program ne
 `firebox vuln-scan URL` is a bounded passive web assessment. It checks the base URL and, only when explicitly supplied, up to eight known paths for TLS, security headers, cookie attributes, server errors, and certificate expiry. It does not crawl, fuzz, brute-force, authenticate, exploit, or submit destructive payloads. It must not be described as a complete penetration test or a full vulnerability scanner.
 
 Wi-Fi commands are intentionally defensive and local-only. They do not scan nearby networks, capture credentials, crack keys, inject frames, deauthenticate clients, or perform wireless attack actions. PCAP analysis reads only capture metadata and record lengths.
+
+Phishing commands are defensive only. Email analysis is static and does not open links or send mail. Templates are clearly marked synthetic awareness material and contain no real-brand impersonation, credential collection, tracking, delivery mechanism, or active phishing links.
 
 Human-readable output is colored automatically in an interactive terminal. Color is disabled when output is redirected, when using `--json`, or when the standard `NO_COLOR=1` environment variable is set:
 
