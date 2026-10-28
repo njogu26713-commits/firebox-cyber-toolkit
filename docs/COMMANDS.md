@@ -18,6 +18,7 @@ After `python3 -m pip install -e .`, the `firebox` command is available. These s
 - `firebox wifi pcap --file authorized-capture.pcap`: inspect PCAP metadata and record lengths without decoding payloads.
 - `firebox phishing analyze --file suspicious-email.eml`: statically analyze a supplied email for phishing indicators.
 - `firebox phishing template --scenario account-alert [--output PATH]`: create clearly labeled synthetic awareness material.
+- `firebox api discover --url https://authorized.example`: check standard API documentation paths without crawling.
 
 Append `--json` for machine-readable output or `--report PATH` to save a JSON report.
 
@@ -39,6 +40,7 @@ Append `--json` for machine-readable output or `--report PATH` to save a JSON re
 - `wifi pcap --file PATH`: report classic PCAP metadata and packet counts, with a 256 MiB input limit.
 - `phishing analyze --file PATH`: inspect headers, links, urgency language, and attachments without opening links or sending mail.
 - `phishing template --scenario suspicious-invoice|account-alert|delivery-notice`: generate non-deliverable training text with no live links or credential collection.
+- `api discover --url URL [--paths /openapi.json,/docs]`: perform bounded read-only GET requests for explicitly selected or standard API documentation paths; maximum 8 paths.
 - `vulns add --title TEXT --severity critical|high|medium|low|info --asset TEXT --evidence TEXT --remediation TEXT [--status open|in-progress|resolved]`: store a finding in SQLite.
 - `vulns list [--status STATUS]`: list stored findings.
 

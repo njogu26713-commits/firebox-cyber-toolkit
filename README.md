@@ -54,6 +54,7 @@ firebox wifi audit --interface wlan0
 firebox wifi pcap --file authorized-capture.pcap
 firebox phishing analyze --file samples/suspicious-email.eml
 firebox phishing template --scenario account-alert --output reports/training-template.txt
+firebox api discover --url https://your-authorized-domain.example
 ```
 
 Results are human-readable by default. Add `--json` only when another program needs machine-readable output, and add `--report PATH` when a JSON report file is required. The longer forms such as `firebox network scan --target HOST` remain supported.
@@ -63,6 +64,8 @@ Results are human-readable by default. Add `--json` only when another program ne
 Wi-Fi commands are intentionally defensive and local-only. They do not scan nearby networks, capture credentials, crack keys, inject frames, deauthenticate clients, or perform wireless attack actions. PCAP analysis reads only capture metadata and record lengths.
 
 Phishing commands are defensive only. Email analysis is static and does not open links or send mail. Templates are clearly marked synthetic awareness material and contain no real-brand impersonation, credential collection, tracking, delivery mechanism, or active phishing links.
+
+API discovery checks standard API documentation paths such as `/openapi.json` and `/swagger.json`, or up to eight paths explicitly supplied with `--paths`. It uses bounded read-only requests and does not crawl, brute-force endpoints, authenticate, or make state-changing API calls.
 
 Human-readable output is colored automatically in an interactive terminal. Color is disabled when output is redirected, when using `--json`, or when the standard `NO_COLOR=1` environment variable is set:
 
