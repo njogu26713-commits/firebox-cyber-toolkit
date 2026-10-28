@@ -4,7 +4,7 @@ from pathlib import Path
 from firebox import __version__
 from firebox.core import emit, write_report
 from firebox import plugin_loader
-from firebox.modules import network, password_tools, log_analyzer, integrity, web_security, web_audit, web_enumeration, metadata, system, vulns, wifi, phishing, api_discovery
+from firebox.modules import network, password_tools, log_analyzer, integrity, web_security, web_audit, web_enumeration, metadata, system, vulns, wifi, phishing, api_discovery, safe_tools
 
 def ports_arg(value):
     try: ports=[int(x.strip()) for x in value.split(',')]; assert all(1<=p<=65535 for p in ports); return ports
@@ -43,7 +43,11 @@ def main(argv=None):
     hs=sub.add_parser('hash'); h=hs.add_subparsers(dest='action',required=True); hg=h.add_parser('generate'); hg.add_argument('--file',required=True); hv=h.add_parser('verify'); hv.add_argument('--file',required=True); hv.add_argument('--expected',required=True); add_common(hg); add_common(hv)
     inte=sub.add_parser('integrity'); ic=inte.add_subparsers(dest='action',required=True); b=ic.add_parser('baseline'); b.add_argument('--path',required=True); b.add_argument('--baseline',default='data/firebox-baseline.json'); b.add_argument('--force',action='store_true'); add_common(b); s=ic.add_parser('scan'); s.add_argument('--path',required=True); s.add_argument('--baseline',default='data/firebox-baseline.json'); add_common(s)
     md=sub.add_parser('metadata'); mc=md.add_subparsers(dest='action',required=True); mi=mc.add_parser('inspect'); mi.add_argument('--file',required=True); add_common(mi)
-    sy=sub.add_parser('system'); si=sy.add_subparsers(dest='action',required=True); inf=si.add_parser('info'); add_common(inf)
+    doc=sub.add_parser('document'); dc=doc.add_subparsers(dest='action',required=True); dpi=dc.add_parser('pdf-info'); dpi.add_argument('--file',required=True); add_common(dpi); ocr=dc.add_parser('ocr'); ocr.add_argument('--file',required=True); add_common(ocr)
+    phn=sub.add_parser('phone'); phc=phn.add_subparsers(dest='action',required=True); phv=phc.add_parser('validate'); phv.add_argument('--number',required=True); add_common(phv)
+    cms=sub.add_parser('cms'); cc=cms.add_subparsers(dest='action',required=True); cmi=cc.add_parser('inspect'); cmi.add_argument('--url',required=True); add_common(cmi)
+    cfg=sub.add_parser('config'); cgc=cfg.add_subparsers(dest='action',required=True); vpn=cgc.add_parser('vpn-check'); vpn.add_argument('--file',required=True); add_common(vpn)
+    sy=sub.add_parser('system'); si=sy.add_subparsers(dest='action',required=True); inf=si.add_parser('info'); add_common(inf); proc=si.add_parser('processes'); add_common(proc)
     wf=sub.add_parser('wifi', description='Read-only local wireless diagnostics; no nearby-network scanning or attack actions'); wfc=wf.add_subparsers(dest='action',required=True); wfs=wfc.add_parser('status'); add_common(wfs); wfa=wfc.add_parser('audit'); wfa.add_argument('--interface',required=True); add_common(wfa); wfp=wfc.add_parser('pcap'); wfp.add_argument('--file',required=True); add_common(wfp)
     ph=sub.add_parser('phishing', description='Defensive phishing analysis and synthetic awareness material only'); phc=ph.add_subparsers(dest='action',required=True); pha=phc.add_parser('analyze'); pha.add_argument('--file',required=True); add_common(pha); pht=phc.add_parser('template'); pht.add_argument('--scenario',required=True, choices=['suspicious-invoice','account-alert','delivery-notice']); pht.add_argument('--output');
     api=sub.add_parser('api', description='Read-only bounded API documentation discovery'); apic=api.add_subparsers(dest='action',required=True); apid=apic.add_parser('discover'); apid.add_argument('--url',required=True); apid.add_argument('--paths',help='comma-separated explicit documentation paths, maximum 8'); apid.add_argument('--timeout',type=float,default=5); add_common(apid)
@@ -68,7 +72,13 @@ def main(argv=None):
         elif a.module=='integrity' and a.action=='baseline': result=integrity.create_baseline(a.path,a.baseline,a.force)
         elif a.module=='integrity': result=integrity.compare(a.path,a.baseline)
         elif a.module=='metadata': result=metadata.inspect(a.file)
-        elif a.module=='system': result=system.info()
+        elif a.module=='document' and a.action=='pdf-info': result=safe_tools.pdf_info(a.file)
+        elif a.module=='document': result=safe_tools.ocr_extract(a.file)
+        elif a.module=='phone': result=safe_tools.phone_validate(a.number)
+        elif a.module=='cms': result=safe_tools.cms_inspect(a.url)
+        elif a.module=='config': result=safe_tools.vpn_audit(a.file)
+        elif a.module=='system' and a.action=='info': result=system.info()
+        elif a.module=='system': result=safe_tools.process_audit()
         elif a.module=='wifi' and a.action=='status': result=wifi.status()
         elif a.module=='wifi' and a.action=='audit': result=wifi.audit(a.interface)
         elif a.module=='wifi': result=wifi.pcap_metadata(a.file)

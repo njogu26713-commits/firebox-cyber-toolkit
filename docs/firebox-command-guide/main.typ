@@ -472,6 +472,64 @@ firebox vulns list --status resolved
 firebox vulns list --json
 ```
 
+= Safe defensive replacement tools
+
+These commands provide defensive alternatives to tracking, cracking, stealth, exploitation, and data-theft tools. They are intentionally limited to format validation, passive inspection, or local user-supplied files.
+
+== Phone-number format validation
+
+This checks formatting only. It does not identify a person, locate a phone, query a carrier, or perform surveillance.
+
+```bash
+firebox phone validate --number '+254700000000'
+firebox phone validate --number '+254700000000' --json
+```
+
+== Passive CMS and technology inspection
+
+This uses observable response headers only. It does not crawl or exploit the site and does not claim positive identification when evidence is inconclusive.
+
+```bash
+firebox cms inspect --url https://your-authorized-domain.example
+firebox cms inspect --url https://your-authorized-domain.example --json
+```
+
+== PDF information
+
+Inspect a user-supplied PDF signature, version, size, and SHA-256 hash.
+
+```bash
+firebox document pdf-info --file report.pdf
+firebox document pdf-info --file report.pdf --json
+```
+
+== Optional local OCR
+
+OCR uses the locally installed Tesseract executable when available. If it is missing, Firebox reports that clearly instead of pretending extraction occurred.
+
+```bash
+firebox document ocr --file image.png
+firebox document ocr --file scanned-document.jpg --json
+```
+
+== Local process inventory
+
+This reports local process names, PIDs, and UIDs. It does not automatically label a process malicious or terminate anything.
+
+```bash
+firebox system processes
+firebox system processes --json
+```
+
+== Read-only VPN configuration check
+
+Review an authorized VPN configuration without modifying it or printing credentials.
+
+```bash
+firebox config vpn-check --file vpn.conf
+firebox config vpn-check --file vpn.conf --json
+```
+
 = Manual Python plugins
 
 Trusted Python files placed in `plugins/` are loaded automatically at startup. The plugin directory contains the full contract in `plugins/README.md`.

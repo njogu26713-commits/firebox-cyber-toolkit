@@ -57,6 +57,12 @@ firebox phishing template --scenario account-alert --output reports/training-tem
 firebox api discover --url https://your-authorized-domain.example
 firebox plugins list
 firebox web enumerate --url https://your-authorized-domain.example --wordlist approved-paths.txt --confirm-authorized
+firebox phone validate --number '+254700000000'
+firebox cms inspect --url https://your-authorized-domain.example
+firebox document pdf-info --file report.pdf
+firebox document ocr --file image.png
+firebox system processes
+firebox config vpn-check --file vpn.conf
 ```
 
 Results are human-readable by default. Add `--json` only when another program needs machine-readable output, and add `--report PATH` when a JSON report file is required. The longer forms such as `firebox network scan --target HOST` remain supported.
@@ -92,6 +98,8 @@ firebox your-command --help
 ```
 
 Plugins execute with the same operating-system permissions as the current user. Review plugin source before using it; a plugin can read files, make network connections, and execute arbitrary Python code. Built-in commands do not depend on plugins.
+
+Safe replacement modules are deliberately limited: phone validation checks format only; CMS inspection is passive header analysis; PDF and OCR commands process user-supplied files; process auditing inventories local processes without declaring them malicious; and VPN checking reads configuration without modifying it or printing secrets.
 
 Human-readable output is colored automatically in an interactive terminal. Color is disabled when output is redirected, when using `--json`, or when the standard `NO_COLOR=1` environment variable is set:
 
