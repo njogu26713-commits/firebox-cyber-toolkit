@@ -55,6 +55,7 @@ firebox wifi pcap --file authorized-capture.pcap
 firebox phishing analyze --file samples/suspicious-email.eml
 firebox phishing template --scenario account-alert --output reports/training-template.txt
 firebox api discover --url https://your-authorized-domain.example
+firebox plugins list
 firebox web enumerate --url https://your-authorized-domain.example --wordlist approved-paths.txt --confirm-authorized
 ```
 
@@ -80,6 +81,17 @@ firebox web enumerate \
 ```
 
 This command is sequential, capped at 500 requests, requires at least 0.1 seconds between requests, and uses only `HEAD`. It does not perform credential/password brute force, Wi-Fi attacks, API mutations, payload injection, crawling, or destructive actions.
+
+## Manual Python plugins
+
+Add trusted Python files to the repository’s `plugins/` directory. Each file must define `register(subparsers)`, add its command parser, and set `_plugin_handler` to a function that accepts parsed arguments and returns a JSON-serializable result. See [plugins/README.md](plugins/README.md) for the exact contract. Then run:
+
+```bash
+firebox plugins list
+firebox your-command --help
+```
+
+Plugins execute with the same operating-system permissions as the current user. Review plugin source before using it; a plugin can read files, make network connections, and execute arbitrary Python code. Built-in commands do not depend on plugins.
 
 Human-readable output is colored automatically in an interactive terminal. Color is disabled when output is redirected, when using `--json`, or when the standard `NO_COLOR=1` environment variable is set:
 

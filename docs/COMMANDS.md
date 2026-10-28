@@ -42,6 +42,7 @@ Append `--json` for machine-readable output or `--report PATH` to save a JSON re
 - `phishing analyze --file PATH`: inspect headers, links, urgency language, and attachments without opening links or sending mail.
 - `phishing template --scenario suspicious-invoice|account-alert|delivery-notice`: generate non-deliverable training text with no live links or credential collection.
 - `api discover --url URL [--paths /openapi.json,/docs]`: perform bounded read-only GET requests for explicitly selected or standard API documentation paths; maximum 8 paths.
+- `plugins list`: validate and list trusted Python plugins in `plugins/` or `FIREBOX_PLUGIN_DIR`.
 - `web enumerate --url URL --wordlist PATH --confirm-authorized [--max-requests N] [--delay SECONDS]`: perform sequential read-only HEAD checks; maximum 500 requests and minimum 0.1-second delay. This is path enumeration only, not credential brute force.
 - `vulns add --title TEXT --severity critical|high|medium|low|info --asset TEXT --evidence TEXT --remediation TEXT [--status open|in-progress|resolved]`: store a finding in SQLite.
 - `vulns list [--status STATUS]`: list stored findings.

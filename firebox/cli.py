@@ -3,6 +3,7 @@ import argparse, json, socket, sys
 from pathlib import Path
 from firebox import __version__
 from firebox.core import emit, write_report
+from firebox import plugin_loader
 from firebox.modules import network, password_tools, log_analyzer, integrity, web_security, web_audit, web_enumeration, metadata, system, vulns, wifi, phishing, api_discovery
 
 def ports_arg(value):
@@ -46,10 +47,13 @@ def main(argv=None):
     wf=sub.add_parser('wifi', description='Read-only local wireless diagnostics; no nearby-network scanning or attack actions'); wfc=wf.add_subparsers(dest='action',required=True); wfs=wfc.add_parser('status'); add_common(wfs); wfa=wfc.add_parser('audit'); wfa.add_argument('--interface',required=True); add_common(wfa); wfp=wfc.add_parser('pcap'); wfp.add_argument('--file',required=True); add_common(wfp)
     ph=sub.add_parser('phishing', description='Defensive phishing analysis and synthetic awareness material only'); phc=ph.add_subparsers(dest='action',required=True); pha=phc.add_parser('analyze'); pha.add_argument('--file',required=True); add_common(pha); pht=phc.add_parser('template'); pht.add_argument('--scenario',required=True, choices=['suspicious-invoice','account-alert','delivery-notice']); pht.add_argument('--output');
     api=sub.add_parser('api', description='Read-only bounded API documentation discovery'); apic=api.add_subparsers(dest='action',required=True); apid=apic.add_parser('discover'); apid.add_argument('--url',required=True); apid.add_argument('--paths',help='comma-separated explicit documentation paths, maximum 8'); apid.add_argument('--timeout',type=float,default=5); add_common(apid)
+    plugins=sub.add_parser('plugins', description='Inspect trusted manually added plugins'); pc=plugins.add_subparsers(dest='action',required=True); pl=pc.add_parser('list'); add_common(pl)
+    plugin_loader.load_into(sub)
     vu=sub.add_parser('vulns'); vc=vu.add_subparsers(dest='action',required=True); vl=vc.add_parser('list'); vl.add_argument('--db',default='data/firebox.db'); vl.add_argument('--status'); add_common(vl); va=vc.add_parser('add'); va.add_argument('--db',default='data/firebox.db'); va.add_argument('--title',required=True); va.add_argument('--severity',required=True); va.add_argument('--asset',required=True); va.add_argument('--evidence',required=True); va.add_argument('--remediation',required=True); va.add_argument('--status',default='open'); add_common(va)
     a=parser.parse_args(argv)
     try:
-        if a.module=='network' and a.action=='scan': result=network.scan(a.target,a.ports,a.timeout,a.workers)
+        if getattr(a, '_plugin_handler', None): result=a._plugin_handler(a)
+        elif a.module=='network' and a.action=='scan': result=network.scan(a.target,a.ports,a.timeout,a.workers)
         elif a.module=='network': result=network.scan(a.target,a.ports,a.timeout,1)
         elif a.module=='dns': result=network.resolve(a.domain)
         elif a.module=='web' and a.action=='check': result=web_security.check(a.url,a.timeout)
@@ -77,6 +81,7 @@ def main(argv=None):
                 print(content, end='')
             return 0
         elif a.module=='api': result=api_discovery.discover(a.url,a.paths,a.timeout)
+        elif a.module=='plugins': result=plugin_loader.inventory()
         elif a.module=='vulns':
             db=vulns.VulnerabilityDB(a.db); result=db.list(a.status) if a.action=='list' else {'id':db.add(a.title,a.severity,a.asset,a.evidence,a.remediation,a.status)}
         else: parser.error('unsupported command')
