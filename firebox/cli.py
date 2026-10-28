@@ -59,7 +59,14 @@ def main(argv=None):
         elif a.module=='vulns':
             db=vulns.VulnerabilityDB(a.db); result=db.list(a.status) if a.action=='list' else {'id':db.add(a.title,a.severity,a.asset,a.evidence,a.remediation,a.status)}
         else: parser.error('unsupported command')
-        write_report(result,getattr(a,'report',None)); emit(result,getattr(a,'json',False)); return 0 if not (isinstance(result,dict) and result.get('error')) else 2
+        write_report(result,getattr(a,'report',None))
+        display = result
+        if a.module == 'network' and a.action == 'scan' and not getattr(a, 'json', False):
+            closed = [item for item in result.get('ports', []) if not item.get('open')]
+            display = {key: value for key, value in result.items() if key != 'ports'}
+            display['closed_or_filtered_ports'] = len(closed)
+            display['open_port_details'] = [item for item in result.get('ports', []) if item.get('open')]
+        emit(display,getattr(a,'json',False)); return 0 if not (isinstance(result,dict) and result.get('error')) else 2
     except (OSError, ValueError, FileNotFoundError, FileExistsError, json.JSONDecodeError) as exc:
         print(f'error: {exc}', file=sys.stderr); return 2
 
