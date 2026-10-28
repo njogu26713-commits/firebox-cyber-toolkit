@@ -1,0 +1,48 @@
+from __future__ import annotations
+import argparse, json, socket, sys
+from firebox import __version__
+from firebox.core import emit, write_report
+from firebox.modules import network, password_tools, log_analyzer, integrity, web_security, metadata, system, vulns
+
+def ports_arg(value):
+    try: ports=[int(x.strip()) for x in value.split(',')]; assert all(1<=p<=65535 for p in ports); return ports
+    except Exception as exc: raise argparse.ArgumentTypeError("ports must be comma-separated integers 1-65535") from exc
+
+def add_common(p): p.add_argument('--json', action='store_true'); p.add_argument('--report', help='write JSON report to this path')
+def main(argv=None):
+    parser=argparse.ArgumentParser(prog='firebox', description='Firebox Cyber Toolkit: authorized defensive security operations')
+    parser.add_argument('--version', action='version', version=__version__); sub=parser.add_subparsers(dest='module', required=True)
+    net=sub.add_parser('network'); ns=net.add_subparsers(dest='action', required=True); scan=ns.add_parser('scan'); scan.add_argument('--target',required=True); scan.add_argument('--ports',type=ports_arg,default=list(range(1,1025))); scan.add_argument('--timeout',type=float,default=2); scan.add_argument('--workers',type=int,default=8); add_common(scan); pp=ns.add_parser('ports'); pp.add_argument('--target',required=True); pp.add_argument('--ports',type=ports_arg,required=True); pp.add_argument('--timeout',type=float,default=2); add_common(pp)
+    dns=sub.add_parser('dns'); d=dns.add_subparsers(dest='action',required=True); dl=d.add_parser('lookup'); dl.add_argument('--domain',required=True); add_common(dl)
+    web=sub.add_parser('web'); wc=web.add_subparsers(dest='action',required=True); w=wc.add_parser('check'); w.add_argument('--url',required=True); w.add_argument('--timeout',type=float,default=8); add_common(w)
+    logs=sub.add_parser('logs'); la=logs.add_subparsers(dest='action',required=True); l=la.add_parser('analyze'); l.add_argument('--file',required=True); l.add_argument('--threshold',type=int,default=5); add_common(l)
+    pw=sub.add_parser('password'); pws=pw.add_subparsers(dest='action',required=True); pg=pws.add_parser('generate'); pg.add_argument('--length',type=int,default=20); pgs=pws.add_parser('strength'); pgs.add_argument('--password',required=True); pgt=pws.add_parser('token'); pgt.add_argument('--length',type=int,default=32); add_common(pg); add_common(pgs); add_common(pgt)
+    hs=sub.add_parser('hash'); h=hs.add_subparsers(dest='action',required=True); hg=h.add_parser('generate'); hg.add_argument('--file',required=True); hv=h.add_parser('verify'); hv.add_argument('--file',required=True); hv.add_argument('--expected',required=True); add_common(hg); add_common(hv)
+    inte=sub.add_parser('integrity'); ic=inte.add_subparsers(dest='action',required=True); b=ic.add_parser('baseline'); b.add_argument('--path',required=True); b.add_argument('--baseline',default='data/firebox-baseline.json'); b.add_argument('--force',action='store_true'); add_common(b); s=ic.add_parser('scan'); s.add_argument('--path',required=True); s.add_argument('--baseline',default='data/firebox-baseline.json'); add_common(s)
+    md=sub.add_parser('metadata'); mc=md.add_subparsers(dest='action',required=True); mi=mc.add_parser('inspect'); mi.add_argument('--file',required=True); add_common(mi)
+    sy=sub.add_parser('system'); si=sy.add_subparsers(dest='action',required=True); inf=si.add_parser('info'); add_common(inf)
+    vu=sub.add_parser('vulns'); vc=vu.add_subparsers(dest='action',required=True); vl=vc.add_parser('list'); vl.add_argument('--db',default='data/firebox.db'); vl.add_argument('--status'); add_common(vl); va=vc.add_parser('add'); va.add_argument('--db',default='data/firebox.db'); va.add_argument('--title',required=True); va.add_argument('--severity',required=True); va.add_argument('--asset',required=True); va.add_argument('--evidence',required=True); va.add_argument('--remediation',required=True); va.add_argument('--status',default='open'); add_common(va)
+    a=parser.parse_args(argv)
+    try:
+        if a.module=='network' and a.action=='scan': result=network.scan(a.target,a.ports,a.timeout,a.workers)
+        elif a.module=='network': result=network.scan(a.target,a.ports,a.timeout,1)
+        elif a.module=='dns': result=network.resolve(a.domain)
+        elif a.module=='web': result=web_security.check(a.url,a.timeout)
+        elif a.module=='logs': result=log_analyzer.analyze(a.file,a.threshold)
+        elif a.module=='password' and a.action=='generate': print(password_tools.generate_password(a.length)); return 0
+        elif a.module=='password' and a.action=='strength': result=password_tools.strength(a.password)
+        elif a.module=='password': print(password_tools.generate_token(a.length)); return 0
+        elif a.module=='hash':
+            actual=password_tools.sha256_file(a.file); result={'file':a.file,'sha256':actual} if a.action=='generate' else {'file':a.file,'expected':a.expected,'actual':actual,'match':actual.lower()==a.expected.lower()}
+        elif a.module=='integrity' and a.action=='baseline': result=integrity.create_baseline(a.path,a.baseline,a.force)
+        elif a.module=='integrity': result=integrity.compare(a.path,a.baseline)
+        elif a.module=='metadata': result=metadata.inspect(a.file)
+        elif a.module=='system': result=system.info()
+        elif a.module=='vulns':
+            db=vulns.VulnerabilityDB(a.db); result=db.list(a.status) if a.action=='list' else {'id':db.add(a.title,a.severity,a.asset,a.evidence,a.remediation,a.status)}
+        else: parser.error('unsupported command')
+        write_report(result,getattr(a,'report',None)); emit(result,getattr(a,'json',False)); return 0 if not (isinstance(result,dict) and result.get('error')) else 2
+    except (OSError, ValueError, FileNotFoundError, FileExistsError, json.JSONDecodeError) as exc:
+        print(f'error: {exc}', file=sys.stderr); return 2
+
+if __name__=='__main__': raise SystemExit(main())
