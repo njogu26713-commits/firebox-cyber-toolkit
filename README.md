@@ -52,7 +52,7 @@ firebox system info
 firebox wifi status
 firebox wifi audit --interface wlan0
 firebox wifi pcap --file authorized-capture.pcap
-firebox phishing analyze --file suspicious-email.eml
+firebox phishing analyze --file samples/suspicious-email.eml
 firebox phishing template --scenario account-alert --output reports/training-template.txt
 ```
 

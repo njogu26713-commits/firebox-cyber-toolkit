@@ -1,0 +1,13 @@
+From: synthetic-sender@example.test
+Reply-To: review@example.test
+Subject: Urgent account alert - training example
+Authentication-Results: example.test; dmarc=fail
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+
+TRAINING ONLY - SYNTHETIC EMAIL
+
+Urgent: verify now within 24 hours or the account will be suspended.
+Review the example training link: http://example.test/login
+
+This file is for local defensive analysis only. Do not send it.
