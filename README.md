@@ -52,6 +52,12 @@ firebox system info
 
 Results are human-readable by default. Add `--json` only when another program needs machine-readable output, and add `--report PATH` when a JSON report file is required. The longer forms such as `firebox network scan --target HOST` remain supported.
 
+Human-readable output is colored automatically in an interactive terminal. Color is disabled when output is redirected, when using `--json`, or when the standard `NO_COLOR=1` environment variable is set:
+
+```bash
+NO_COLOR=1 firebox scan 127.0.0.1 --ports 22,80,443
+```
+
 Generated passwords and tokens are written only to stdout and are never logged by the application. Store them securely.
 
 ## Commands
