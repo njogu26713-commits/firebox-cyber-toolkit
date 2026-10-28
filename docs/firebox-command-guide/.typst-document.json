@@ -1,0 +1,10 @@
+{
+  "entry": "main.typ",
+  "metadata": {
+    "author": "Firebox Cyber Toolkit",
+    "subtitle": "Complete commands, examples, usage, and safety limits",
+    "title": "Firebox Cyber Toolkit Command Guide"
+  },
+  "mode": "report",
+  "theme": "report-theme.typ"
+}

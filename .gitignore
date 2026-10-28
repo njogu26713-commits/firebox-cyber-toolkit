@@ -7,3 +7,8 @@ __pycache__/
 *.db
 data/*.json
 reports/*.json
+.typst-content-manifest.json
+.typst-build-plan.json
+docs/firebox-command-guide/review/
+*.typst-diagnostics.log
+*.verify.json
