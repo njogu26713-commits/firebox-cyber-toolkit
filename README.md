@@ -6,7 +6,7 @@ Firebox is a lightweight, production-oriented Python CLI for authorized defensiv
 
 ```bash
 sudo apt-get update && sudo apt-get install -y git python3 python3-venv
- git clone https://github.com/njogu26713-commits/firebox-cyber-toolkit.git
+git clone https://github.com/njogu26713-commits/firebox-cyber-toolkit.git
 cd firebox-cyber-toolkit
 python3 -m venv .venv
 source .venv/bin/activate
@@ -16,6 +16,27 @@ python3 app.py --help
 ```
 
 No external runtime dependency is required. The optional dashboard and OCR integration are intentionally not enabled in this initial production CLI release. Run commands only against assets you own or are authorized to assess.
+
+### If `.venv/bin/activate` does not exist
+
+The virtual environment is local to each server and is intentionally not stored in Git. From the repository directory, create it before activating it:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y python3-venv
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt
+```
+
+If `.venv` is present but incomplete, remove only that local environment and recreate it; this does not remove repository files:
+
+```bash
+rm -rf .venv
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
 ## First operations
 
