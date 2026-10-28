@@ -55,6 +55,7 @@ firebox wifi pcap --file authorized-capture.pcap
 firebox phishing analyze --file samples/suspicious-email.eml
 firebox phishing template --scenario account-alert --output reports/training-template.txt
 firebox api discover --url https://your-authorized-domain.example
+firebox web enumerate --url https://your-authorized-domain.example --wordlist approved-paths.txt --confirm-authorized
 ```
 
 Results are human-readable by default. Add `--json` only when another program needs machine-readable output, and add `--report PATH` when a JSON report file is required. The longer forms such as `firebox network scan --target HOST` remain supported.
@@ -66,6 +67,19 @@ Wi-Fi commands are intentionally defensive and local-only. They do not scan near
 Phishing commands are defensive only. Email analysis is static and does not open links or send mail. Templates are clearly marked synthetic awareness material and contain no real-brand impersonation, credential collection, tracking, delivery mechanism, or active phishing links.
 
 API discovery checks standard API documentation paths such as `/openapi.json` and `/swagger.json`, or up to eight paths explicitly supplied with `--paths`. It uses bounded read-only requests and does not crawl, brute-force endpoints, authenticate, or make state-changing API calls.
+
+For an authorized, read-only path enumeration, provide your own approved wordlist and explicit confirmation:
+
+```bash
+firebox web enumerate \
+  --url https://your-authorized-domain.example \
+  --wordlist approved-paths.txt \
+  --confirm-authorized \
+  --max-requests 100 \
+  --delay 0.5
+```
+
+This command is sequential, capped at 500 requests, requires at least 0.1 seconds between requests, and uses only `HEAD`. It does not perform credential/password brute force, Wi-Fi attacks, API mutations, payload injection, crawling, or destructive actions.
 
 Human-readable output is colored automatically in an interactive terminal. Color is disabled when output is redirected, when using `--json`, or when the standard `NO_COLOR=1` environment variable is set:
 

@@ -3,7 +3,7 @@ import argparse, json, socket, sys
 from pathlib import Path
 from firebox import __version__
 from firebox.core import emit, write_report
-from firebox.modules import network, password_tools, log_analyzer, integrity, web_security, web_audit, metadata, system, vulns, wifi, phishing, api_discovery
+from firebox.modules import network, password_tools, log_analyzer, integrity, web_security, web_audit, web_enumeration, metadata, system, vulns, wifi, phishing, api_discovery
 
 def ports_arg(value):
     try: ports=[int(x.strip()) for x in value.split(',')]; assert all(1<=p<=65535 for p in ports); return ports
@@ -36,7 +36,7 @@ def main(argv=None):
     parser.add_argument('--version', action='version', version=__version__); sub=parser.add_subparsers(dest='module', required=True)
     net=sub.add_parser('network'); ns=net.add_subparsers(dest='action', required=True); scan=ns.add_parser('scan'); scan.add_argument('--target',required=True); scan.add_argument('--ports',type=ports_arg,default=list(range(1,1025))); scan.add_argument('--timeout',type=float,default=2); scan.add_argument('--workers',type=int,default=8); add_common(scan); pp=ns.add_parser('ports'); pp.add_argument('--target',required=True); pp.add_argument('--ports',type=ports_arg,required=True); pp.add_argument('--timeout',type=float,default=2); add_common(pp)
     dns=sub.add_parser('dns'); d=dns.add_subparsers(dest='action',required=True); dl=d.add_parser('lookup'); dl.add_argument('--domain',required=True); add_common(dl)
-    web=sub.add_parser('web'); wc=web.add_subparsers(dest='action',required=True); w=wc.add_parser('check'); w.add_argument('--url',required=True); w.add_argument('--timeout',type=float,default=8); add_common(w); audit=wc.add_parser('audit'); audit.add_argument('--url',required=True); audit.add_argument('--paths',help='comma-separated explicit paths, maximum 8'); audit.add_argument('--timeout',type=float,default=8); add_common(audit)
+    web=sub.add_parser('web'); wc=web.add_subparsers(dest='action',required=True); w=wc.add_parser('check'); w.add_argument('--url',required=True); w.add_argument('--timeout',type=float,default=8); add_common(w); audit=wc.add_parser('audit'); audit.add_argument('--url',required=True); audit.add_argument('--paths',help='comma-separated explicit paths, maximum 8'); audit.add_argument('--timeout',type=float,default=8); add_common(audit); enum=wc.add_parser('enumerate'); enum.add_argument('--url',required=True); enum.add_argument('--wordlist',required=True); enum.add_argument('--max-requests',type=int,default=100); enum.add_argument('--delay',type=float,default=0.5); enum.add_argument('--timeout',type=float,default=5); enum.add_argument('--confirm-authorized',action='store_true'); add_common(enum)
     logs=sub.add_parser('logs'); la=logs.add_subparsers(dest='action',required=True); l=la.add_parser('analyze'); l.add_argument('--file',required=True); l.add_argument('--threshold',type=int,default=5); add_common(l)
     pw=sub.add_parser('password'); pws=pw.add_subparsers(dest='action',required=True); pg=pws.add_parser('generate'); pg.add_argument('--length',type=int,default=20); pgs=pws.add_parser('strength'); pgs.add_argument('--password',required=True); pgt=pws.add_parser('token'); pgt.add_argument('--length',type=int,default=32); add_common(pg); add_common(pgs); add_common(pgt)
     hs=sub.add_parser('hash'); h=hs.add_subparsers(dest='action',required=True); hg=h.add_parser('generate'); hg.add_argument('--file',required=True); hv=h.add_parser('verify'); hv.add_argument('--file',required=True); hv.add_argument('--expected',required=True); add_common(hg); add_common(hv)
@@ -53,7 +53,8 @@ def main(argv=None):
         elif a.module=='network': result=network.scan(a.target,a.ports,a.timeout,1)
         elif a.module=='dns': result=network.resolve(a.domain)
         elif a.module=='web' and a.action=='check': result=web_security.check(a.url,a.timeout)
-        elif a.module=='web': result=web_audit.audit(a.url,a.paths,a.timeout)
+        elif a.module=='web' and a.action=='audit': result=web_audit.audit(a.url,a.paths,a.timeout)
+        elif a.module=='web': result=web_enumeration.enumerate_paths(a.url,a.wordlist,a.max_requests,a.delay,a.confirm_authorized,a.timeout)
         elif a.module=='logs': result=log_analyzer.analyze(a.file,a.threshold)
         elif a.module=='password' and a.action=='generate': print(password_tools.generate_password(a.length)); return 0
         elif a.module=='password' and a.action=='strength': result=password_tools.strength(a.password)
